@@ -121,7 +121,7 @@ var handle_req = function (req, res) {
         return res.end();
     }
 
-    var match = hostname.match(/^([a-z]{4})[.].*/);
+    var match = hostname.match(/^(tunnel-[a-z]{8})[.].*/);
     if (match) {
         var client_id = match[1];
         var client = clients[client_id];
@@ -139,16 +139,16 @@ var handle_req = function (req, res) {
     var parsed = url.parse(req.url, true);
 
     // redirect main page to github reference
-    if (req.url === '/' && !parsed.query.new) {
-        res.writeHead(301, { Location: 'http://shtylman.github.com/localtunnel/' });
-        res.end();
-        return;
-    }
+    // if (req.url === '/' && !parsed.query.new) {
+    //    res.writeHead(301, { Location: 'http://shtylman.github.com/localtunnel/' });
+    //    res.end();
+    //    return;
+    // }
 
     // at this point, the client is requesting a new tunnel setup
     // either generate an id or use the one they requested
 
-    var match = req.url.match(/\/([a-z]{4})?/);
+    var match = req.url.match(/\/(tunnel-[a-z0-9]{8})?/);
 
     // user can request a particular set of characters
     // will be given if not already taken
@@ -159,11 +159,11 @@ var handle_req = function (req, res) {
         requested_id = match[1];
     }
 
-    var id = requested_id || rand_id();
+    var id = requested_id || 'tunnel-' + rand_id();
 
     // if the id already exists, this client must use something else
     if (clients[id]) {
-        id = rand_id();
+        id = 'tunnel-' + rand_id();
     }
 
     // sockets is a list of available sockets for the connection
@@ -270,7 +270,7 @@ var handle_upgrade = function(req, ws) {
         return res.end();
     }
 
-    var match = hostname.match(/^([a-z]{4})[.].*/);
+    var match = hostname.match(/^(tunnel-[a-z0-9]{8})[.].*/);
 
     // not a valid client
     if (!match) {
